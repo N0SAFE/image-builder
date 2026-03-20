@@ -1,0 +1,49 @@
+{
+    "name": "@repo/types",
+    "version": "1.0.0",
+    "exports": {
+        "./*": {
+            "import": {
+                "types": "./*.ts"
+            },
+            "require": {
+                "types": "./*.ts"
+            }
+        }
+    },
+    "scripts": {
+        "prettify": "prettier . --write --no-error-on-unmatched-pattern",
+        "format": "bun run prettify",
+        "format:check": "prettier . --check --no-error-on-unmatched-pattern",
+        "lint": "eslint \"**/*.ts*\"",
+        "type-check": "tsc --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage"
+    },
+    "devDependencies": {
+        "eslint": "catalog:linting",
+        "@eslint/eslintrc": "^3.3.3",
+        "@eslint/js": "catalog:linting",
+        "@repo/config-eslint": "*",
+        "@repo/config-prettier": "*",
+        "@repo/config-typescript": "*",
+        "@repo/config-vitest": "*",
+        "typescript": "catalog:build",
+        "vitest": "catalog:testing",
+        "zod": "catalog:utils",
+        "drizzle-orm": "catalog:database"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "concurrently": "^9.2.1",
+        "rimraf": "catalog:build"
+    },
+    "peerDependencies": {
+        "concurrently": "^9.2.1",
+        "rimraf": "catalog:build"
+    }
+}

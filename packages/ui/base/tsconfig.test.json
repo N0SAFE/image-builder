@@ -1,0 +1,12 @@
+{
+  "extends": "@repo/config-typescript/config/test.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@": ["./src"],
+      "#": ["./"]
+    },
+    "jsx": "react-jsx"
+  },
+  "include": ["__tests__/**/*"]
+}

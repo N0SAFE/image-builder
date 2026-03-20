@@ -1,0 +1,27 @@
+{
+    "name": "@repo/config-typescript",
+    "version": "0.0.0",
+    "private": true,
+    "license": "MIT",
+    "exports": {
+        "./*": "./config/*.json",
+        "./config/*": "./config/*"
+    },
+    "devDependencies": {
+        "@repo/config-prettier": "*",
+        "@repo/config-vitest": "*",
+        "vitest": "catalog:testing"
+    },
+    "scripts": {
+        "prettify": "prettier . --write --no-error-on-unmatched-pattern",
+        "format": "bun run prettify",
+        "format:check": "prettier . --check --no-error-on-unmatched-pattern",
+        "type-check": "tsc --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}

@@ -1,0 +1,240 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+'use client'
+
+// Using typed routing: replace raw next/link with declarative routes
+
+import { Button } from '@repo/ui/components/shadcn/button'
+import { Input } from '@repo/ui/components/shadcn/input'
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@repo/ui/components/shadcn/form'
+import { Alert, AlertDescription } from '@repo/ui/components/shadcn/alert'
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@repo/ui/components/shadcn/card'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import React from 'react'
+import redirect from '@/actions/redirect'
+import { AlertCircle, Spinner } from '@repo/ui/components/atomics/atoms/Icon'
+import { loginSchema } from './schema'
+import { AuthSignin, AuthSignup, Setup } from '@/routes'
+import { Shield } from 'lucide-react'
+import { authClient } from '@/lib/auth'
+import { PageTimingLogger } from '@/lib/timing'
+import { useSetupStatus } from '@/domains/setup/hooks'
+import { useRouter } from 'next/navigation'
+
+// Use the Route wrapper to get type-safe, Suspense-wrapped search params
+export default AuthSignin.Route(({ searchParams }) => {
+    const [isLoading, setIsLoading] = React.useState<boolean>(false)
+    const [error, setError] = React.useState<string>('')
+    const router = useRouter()
+    const setupStatus = useSetupStatus()
+
+    React.useEffect(() => {
+        if (setupStatus.data?.needsSetup) {
+            router.replace(
+                Setup(
+                    {},
+                    {
+                        redirectTo: searchParams.redirectTo ?? searchParams.callbackUrl,
+                    }
+                )
+            )
+        }
+    }, [setupStatus.data, router, searchParams.callbackUrl, searchParams.redirectTo])
+
+    if (setupStatus.data?.needsSetup) {
+        return (
+            <div className="flex flex-1 items-center justify-center">
+                <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                    <Spinner /> Redirecting to setup...
+                </div>
+            </div>
+        )
+    }
+
+    const form = useForm<z.infer<typeof loginSchema>>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: '',
+            password: '',
+        },
+    })
+
+    const onSubmit = async (
+        values: z.infer<typeof loginSchema>
+    ): Promise<void> => {
+        setIsLoading(true)
+        setError('')
+        const res = await authClient.signIn.email({
+            email: values.email,
+            password: values.password,
+        })
+        if (res?.error) {
+            console.log(res)
+            // Handle both string and object error types
+            const errorMessage = res.error.message ?? 'Authentication failed'
+            setError(errorMessage)
+            setIsLoading(false)
+        } else {
+            setIsLoading(false)
+            void redirect(searchParams.redirectTo ?? searchParams.callbackUrl ?? '/')
+        }
+    }
+
+    return (
+        <div className="flex flex-1 items-center justify-center">
+            <div className="w-full max-w-md space-y-8">
+                <Card>
+                    <CardHeader className="space-y-4 text-center">
+                        <div className="flex justify-center">
+                            <div className="bg-primary/10 rounded-full p-3">
+                                <Shield className="text-primary h-8 w-8" />
+                            </div>
+                        </div>
+                        <div>
+                            <CardTitle className="text-2xl font-bold">
+                                Welcome Back
+                            </CardTitle>
+                            <CardDescription className="text-base">
+                                Sign in to your account to access the NestJS
+                                application
+                            </CardDescription>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <Form {...form}>
+                            <form
+                                onSubmit={(e) => {
+                                    void form.handleSubmit(onSubmit)(e)
+                                }}
+                                className="space-y-6"
+                            >
+                                <div className="space-y-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel htmlFor="email">
+                                                    Email Address
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="john@example.com"
+                                                        id="email"
+                                                        type="email"
+                                                        className="h-12"
+                                                        autoComplete="username webauthn"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="password"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel htmlFor="password">
+                                                    Password
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        id="password"
+                                                        type="password"
+                                                        className="h-12"
+                                                        autoComplete="current-password webauthn"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    {error && (
+                                        <Alert variant="destructive">
+                                            <AlertCircle className="h-4 w-4" />
+                                            <AlertDescription>
+                                                {error}
+                                            </AlertDescription>
+                                        </Alert>
+                                    )}
+
+                                    <div className="space-y-3">
+                                        <Button
+                                            disabled={isLoading}
+                                            type="submit"
+                                            className="h-12 w-full text-base"
+                                        >
+                                            {isLoading && <Spinner />}
+                                            Sign In with Email
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <div className="relative">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <span className="w-full border-t" />
+                                    </div>
+                                    <div className="relative flex justify-center text-xs uppercase">
+                                        <span className="bg-background text-muted-foreground px-2">
+                                            Demo Credentials
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="bg-muted/50 rounded-lg p-4 text-sm">
+                                    <p className="text-foreground mb-2 font-medium">
+                                        Try the demo:
+                                    </p>
+                                    <div className="text-muted-foreground space-y-1">
+                                        <p>
+                                            <strong>Email:</strong>{' '}
+                                            admin@admin.com
+                                        </p>
+                                        <p>
+                                            <strong>Password:</strong> adminadmin
+                                        </p>
+                                    </div>
+                                </div>
+                            </form>
+                        </Form>
+                </CardContent>
+                </Card>
+                <div className="text-muted-foreground text-center text-sm">
+                    <p>
+                        Don&apos;t have an account?{' '}
+                        <AuthSignup.Link
+                            search={{
+                                redirectTo: searchParams.redirectTo,
+                                callbackUrl: searchParams.callbackUrl,
+                            }}
+                            className="text-primary hover:underline"
+                        >
+                            Create one here
+                        </AuthSignup.Link>
+                    </p>
+                </div>
+                
+                {/* Timing Logger */}
+                <PageTimingLogger pageName="Sign In" />
+            </div>
+        </div>
+    )
+})

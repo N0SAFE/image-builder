@@ -1,0 +1,5 @@
+#!/bin/sh
+echo "🚀 Running pre-push hook with turbo..."
+
+# Run turbo with the specific commit range
+bun run check -- --affected

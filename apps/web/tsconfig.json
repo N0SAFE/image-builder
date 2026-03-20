@@ -1,0 +1,32 @@
+{
+    "extends": "@repo/config-typescript/config/nextjs.json",
+    "compilerOptions": {
+        "useDefineForClassFields": true,
+        "incremental": true,
+        "plugins": [
+            {
+                "name": "next"
+            }
+        ],
+        "paths": {
+            "@/*": ["./src/*"],
+            "#/*": ["./*"],
+            "@api/*": ["../api/src/*"]
+        },
+        "target": "ES2017",
+        // Enable react-server condition for TypeScript to understand conditional exports
+        // This matches how Next.js bundler resolves imports in RSC context
+        "customConditions": ["react-server"]
+    },
+    "include": [
+        "tailwind.config.mts",
+        "eslint.config.ts",
+        "next-env.d.ts",
+        "**/*.ts",
+        "**/*.tsx",
+        ".next/types/**/*.ts",
+        "next.config.js",
+        "next-sitemap.config.js"
+    ],
+    "exclude": ["node_modules"]
+}
