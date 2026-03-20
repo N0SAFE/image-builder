@@ -33,7 +33,7 @@ jobs:
                 bun install --frozen-lockfile
 
             - name: 💾 Share dependencies for this CI run
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: |
                       ~/.bun/install/cache
@@ -57,7 +57,7 @@ jobs:
 
             - name: 💾 Cache declarative routes
               id: cache-declarative-routes
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: |
                       apps/web/src/routes/index.ts
@@ -77,7 +77,7 @@ jobs:
             - name: 💾 Restore shared dependencies
               id: restore-shared-deps
               if: steps.cache-declarative-routes.outputs.cache-hit != 'true'
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: |
                       ~/.bun/install/cache
@@ -160,7 +160,7 @@ jobs:
 
             - name: 💾 Restore shared dependencies
               id: restore-shared-deps
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: |
                       ~/.bun/install/cache
@@ -176,7 +176,7 @@ jobs:
                 bun install --frozen-lockfile
 
             - name: � Restore declarative routes cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: |
                       apps/web/src/routes/index.ts
@@ -262,7 +262,7 @@ jobs:
 
             - name: 💾 Restore shared dependencies
               id: restore-shared-deps
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: |
                       ~/.bun/install/cache
@@ -278,7 +278,7 @@ jobs:
                 bun install --frozen-lockfile
 
             - name: 💾 Restore declarative routes cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: |
                       apps/web/src/routes/index.ts
@@ -366,7 +366,7 @@ jobs:
 
             - name: 💾 Restore shared dependencies
               id: restore-shared-deps
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: |
                       ~/.bun/install/cache
@@ -382,7 +382,7 @@ jobs:
                 bun install --frozen-lockfile
 
             - name: 💾 Restore declarative routes cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: |
                       apps/web/src/routes/index.ts
