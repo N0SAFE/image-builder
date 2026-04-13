@@ -299,7 +299,7 @@
         "knip": "^5.81.0",
         "nyc": "^17.1.0",
         "rimraf": "catalog:build",
-        "turbo": "2.8.9",
+        "turbo": "2.9.6",
         "vite": "catalog:build",
         "vitest": "catalog:testing"
     },
