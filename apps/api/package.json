@@ -73,7 +73,7 @@
     "better-auth": "catalog:auth",
     "better-sqlite3": "catalog:database",
     "bull": "^4.16.5",
-    "dockerode": "^4.0.9",
+    "dockerode": "^5.0.0",
     "drizzle-kit": "catalog:database",
     "drizzle-orm": "catalog:database",
     "eslint": "catalog:linting",
