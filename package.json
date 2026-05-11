@@ -296,7 +296,7 @@
         "concurrently": "catalog:dev",
         "cross-env": "^10.1.0",
         "dotenv-cli": "catalog:dev",
-        "knip": "^5.81.0",
+        "knip": "^6.12.2",
         "nyc": "^17.1.0",
         "rimraf": "catalog:build",
         "turbo": "2.8.9",
