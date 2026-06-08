@@ -90,7 +90,7 @@
     "class-variance-authority": "catalog:ui",
     "clsx": "catalog:styling",
     "cmdk": "^1.1.1",
-    "concurrently": "^9.2.1",
+    "concurrently": "^10.0.3",
     "framer-motion": "catalog:ui",
     "lucide-react": "catalog:ui",
     "next-themes": "catalog:next",
