@@ -16,6 +16,7 @@ import {
     meshContract,
     fleetContract,
     setupContract,
+    armbianContract,
 } from "./modules/index";
 
 // Main app contract that combines all feature contracts
@@ -32,6 +33,7 @@ export const appContract = oc.router({
     providerSchema: providerSchemaContract,
     template: templateContract,
     setup: setupContract,
+    armbian: armbianContract,
     core: oc
         .tag("Core")
         .prefix("/core")

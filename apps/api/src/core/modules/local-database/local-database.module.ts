@@ -14,18 +14,29 @@ const logger = new Logger("LocalDatabaseModule");
     providers: [
         {
             provide: LOCAL_DATABASE_CONNECTION,
-            useFactory: () => { 
+            useFactory: () => {
                 const dbPath = process.env.NODE_LOCAL_DB_PATH ?? "/app/data/local.db";
                 const dir = path.dirname(dbPath);
-                if (!fs.existsSync(dir)) {
-                    fs.mkdirSync(dir, { recursive: true });
-                    logger.log(`Created local data directory: ${dir}`);
+                try {
+                    if (!fs.existsSync(dir)) {
+                        fs.mkdirSync(dir, { recursive: true });
+                        logger.log(`Created local data directory: ${dir}`);
+                    }
+
+                    logger.log(`Opening local SQLite database: ${dbPath}`);
+                    const sqlite = new Database(dbPath);
+                    // Enable WAL mode for better concurrent read performance
+                    sqlite.pragma("journal_mode = WAL");
+
+                    return drizzle(sqlite, { schema: localSchema });
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error);
+                    logger.warn(
+                        `Local SQLite disabled: ${message}. ` +
+                        "Setup-related local persistence features are unavailable until SQLite is supported in this runtime.",
+                    );
+                    return null;
                 }
-                logger.log(`Opening local SQLite database: ${dbPath}`);
-                const sqlite = new Database(dbPath);
-                // Enable WAL mode for better concurrent read performance
-                sqlite.pragma("journal_mode = WAL");
-                return drizzle(sqlite, { schema: localSchema });
             },
         },
         LocalDatabaseService,

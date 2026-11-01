@@ -62,6 +62,7 @@
     "@orpc/shared": "catalog:orpc",
     "@orpc/zod": "catalog:orpc",
     "@repo/api-contracts": "*",
+    "@repo/nest-modules": "*",
     "@repo/auth": "*",
     "@repo/env": "*",
     "@repo/logger": "*",

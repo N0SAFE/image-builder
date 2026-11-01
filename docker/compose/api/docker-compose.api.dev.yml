@@ -123,6 +123,8 @@ services:
       - turbo_cache_dev:/root/.cache/turbo
       # Persistent uploads directory for media files
       - api_uploads_dev:/app/apps/api/uploads
+      # Docker socket required for Armbian worker orchestration via Docker API
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       # Runtime
       - NODE_ENV=development
@@ -208,6 +210,8 @@ services:
       - bun_cache_dev:/root/.bun/install/cache
       - turbo_cache_dev:/root/.cache/turbo
       - api_uploads_dev_2:/app/apps/api/uploads
+      # Docker socket required for Armbian worker orchestration via Docker API
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@api-db-dev:5432/${DB_DATABASE:-nestjs_api}

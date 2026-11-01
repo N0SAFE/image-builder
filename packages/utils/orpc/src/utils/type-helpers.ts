@@ -16,6 +16,10 @@ import {
   type ContractProcedureBuilderWithInputOutput,
   type ContractRouterBuilder,
   type AnyContractProcedure,
+  type AnyContractRouter,
+  type AnySchema,
+  type InferSchemaInput,
+  type InferSchemaOutput,
 } from "@orpc/contract";
 
 /**
@@ -104,6 +108,54 @@ export type InferOutputSchema<T extends AnyContractProcedureOrBuilder> =
   T extends ContractProcedure<any, infer TOutputSchema, any, any>
     ? TOutputSchema
     : never;
+
+/**
+ * Infer procedure input directly from the materialized `~orpc.inputSchema` property.
+ *
+ * This is more resilient than generic-based extraction for some advanced/custom
+ * builder compositions (notably streaming wrappers) where upstream helper
+ * inference can widen to `unknown`.
+ */
+export type InferProcedureInputFromSchema<T extends { "~orpc": { inputSchema?: AnySchema } }> =
+  T["~orpc"]["inputSchema"] extends infer TSchema
+    ? TSchema extends AnySchema
+      ? InferSchemaInput<TSchema>
+      : never
+    : never;
+
+/**
+ * Infer procedure output directly from the materialized `~orpc.outputSchema` property.
+ */
+export type InferProcedureOutputFromSchema<T extends { "~orpc": { outputSchema?: AnySchema } }> =
+  T["~orpc"]["outputSchema"] extends infer TSchema
+    ? TSchema extends AnySchema
+      ? InferSchemaOutput<TSchema>
+      : never
+    : never;
+
+/**
+ * Router-level recursive input inference based on `~orpc.inputSchema`.
+ */
+export type InferRouterInputsFromSchema<T extends AnyContractRouter> =
+  T extends { "~orpc": { inputSchema?: AnySchema } }
+    ? InferProcedureInputFromSchema<T>
+    : {
+        [K in keyof T]: T[K] extends AnyContractRouter
+          ? InferRouterInputsFromSchema<T[K]>
+          : never;
+      };
+
+/**
+ * Router-level recursive output inference based on `~orpc.outputSchema`.
+ */
+export type InferRouterOutputsFromSchema<T extends AnyContractRouter> =
+  T extends { "~orpc": { outputSchema?: AnySchema } }
+    ? InferProcedureOutputFromSchema<T>
+    : {
+        [K in keyof T]: T[K] extends AnyContractRouter
+          ? InferRouterOutputsFromSchema<T[K]>
+          : never;
+      };
 
 /**
  * Extract the error map type from an ORPC procedure or builder.

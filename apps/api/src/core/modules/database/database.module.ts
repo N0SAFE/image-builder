@@ -8,7 +8,6 @@ import { EnvService } from "../../../config/env/env.service";
 import { EnvModule } from "../../../config/env/env.module";
 import { LocalDatabaseModule } from "../local-database/local-database.module";
 import { LocalDatabaseService } from "../local-database/local-database.service";
-import { nodeConfig } from "@/config/drizzle/local-schema";
 
 const logger = new Logger("DatabaseModule");
 
@@ -22,11 +21,7 @@ const logger = new Logger("DatabaseModule");
             useFactory: (envService: EnvService, localDb: LocalDatabaseService) => {
                 // Env var takes priority (useful for compose overrides, CI, tests)
                 const urlFromEnv = envService.get("DATABASE_URL");
-                const urlFromConfig = localDb.db
-                    .select({ databaseUrl: nodeConfig.databaseUrl })
-                    .from(nodeConfig)
-                    .limit(1)
-                    .all()[0]?.databaseUrl ?? undefined;
+                const urlFromConfig = localDb.getConfiguredDatabaseUrl();
 
                 const connectionString = urlFromEnv ?? urlFromConfig;
 

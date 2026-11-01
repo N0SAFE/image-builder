@@ -7,7 +7,7 @@ export const providersCatalog: ProviderMetadata[] = [
         description: "Deploy from GitHub repositories",
         icon: "github",
         category: "git",
-        supportedBuilders: ["dockerfile", "nixpacks", "static"],
+        supportedBuilders: ["dockerfile", "nixpacks", "static", "armbian"],
         tags: ["git", "github", "ci-cd"],
     },
     {
@@ -16,7 +16,7 @@ export const providersCatalog: ProviderMetadata[] = [
         description: "Deploy static assets from uploaded artifacts",
         icon: "upload",
         category: "manual",
-        supportedBuilders: ["static"],
+        supportedBuilders: ["static", "armbian"],
         tags: ["static", "upload"],
     },
 ];

@@ -410,6 +410,7 @@ All documentation lives in the **`apps/doc`** documentation app (`apps/doc/conte
 | Adding new pages | `apps/doc/content/docs/dev/routing.mdx` | Using the routes |
 | Database operations | `apps/doc/content/docs/dev/database-lifecycle.mdx` | Schema & Migrations |
 | Docker issues | `apps/doc/content/docs/docker/docker-build-strategies.mdx` | Troubleshooting |
+| Armbian image build workflow | `apps/doc/content/docs/docker/armbian-builds.mdx` | Runtime model & API |
 | Production deployment | `apps/doc/content/docs/deployment/production-deployment.mdx` | Production Environment Variables |
 | Environment configuration | `apps/doc/content/docs/tooling/environment-template-system.mdx` | Template System |
 | Testing setup | `apps/doc/content/docs/testing/testing.mdx` | Running Tests |

@@ -5,8 +5,8 @@
   "scripts": {
     "build": "next build --turbopack",
     "compile": "next build --experimental-build-mode=compile --turbopack --debug-prerender",
-    "dev": "next dev -p 3020",
-    "start": "next start -p 3020",
+    "dev": "next dev -p ${NEXT_PUBLIC_DOC_PORT:-3020}",
+    "start": "next start -p ${NEXT_PUBLIC_DOC_PORT:-3020}",
     "postinstall": "fumadocs-mdx",
     "prettify": "prettier . --write --no-error-on-unmatched-pattern",
     "format": "bun run prettify",

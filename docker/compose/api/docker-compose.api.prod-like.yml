@@ -115,6 +115,8 @@ services:
       - turbo_cache_prod:/root/.cache/turbo
       # Persistent uploads directory for media files
       - api_uploads_prod:/app/apps/api/uploads
+      # Docker socket required for Armbian worker orchestration via Docker API
+      - /var/run/docker.sock:/var/run/docker.sock
 
 networks:
   app_network_prod:

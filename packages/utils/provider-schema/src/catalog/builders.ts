@@ -28,4 +28,13 @@ export const buildersCatalog: BuilderMetadata[] = [
         compatibleProviders: ["github", "static"],
         tags: ["static", "frontend"],
     },
+    {
+        id: "armbian",
+        name: "Armbian Builder",
+        description: "Build bootable Armbian images for ARM boards in isolated Docker workers",
+        icon: "cpu",
+        category: "container",
+        compatibleProviders: ["github", "static"],
+        tags: ["armbian", "embedded", "image", "iot"],
+    },
 ];

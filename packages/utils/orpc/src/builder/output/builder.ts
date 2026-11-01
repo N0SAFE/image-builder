@@ -15,7 +15,7 @@
 
 import { eventIterator } from "@orpc/contract";
 import { DetailedOutputBrand, type DetailedOutput } from "../core/route-builder";
-import type { AnySchema, HTTPMethod, ErrorMap, UnionTuple } from "../../shared/types";
+import type { AnySchema, HTTPMethod, ErrorMap, UnionTuple, InferSchemaInput, InferSchemaOutput } from "../../shared/types";
 import type { ObjectSchema, LiteralSchema, VoidSchema, SchemaShape } from "../../shared/standard-schema-helpers";
 import { objectSchema, voidSchema, literalSchema, unionSchema, emptyObjectSchema, getSchemaShape, optionalSchema } from "../../shared/standard-schema-helpers";
 import { ProxyBuilderBase } from "../core/proxy-builder.base";
@@ -48,6 +48,13 @@ export type ExtractOutputHeaders<T> =
  */
 export type OutputSchemaProxySchema<TData extends AnySchema | DetailedOutput> =
     TData extends DetailedOutput<infer S, infer H, infer B> ? (S extends 200 ? (H extends ObjectSchema<Record<never, never>> ? B : TData) : TData) : TData;
+
+/**
+ * Wrap a schema into an ORPC EventIterator schema while preserving yield input/output typing.
+ */
+type EventIteratorWrappedSchema<TSchema extends AnySchema> = ReturnType<
+    typeof eventIterator<InferSchemaInput<TSchema>, InferSchemaOutput<TSchema>>
+>;
 
 /**
  * Runtime guard for detailed output mode.
@@ -188,10 +195,10 @@ export abstract class DetailedOutputBuilder<
                 builder: (current: ExtractOutputBody<TData>) => TNewBody,
             ): OutputSchemaProxy<DetailedOutput<ExtractOutputStatus<TData>, ExtractOutputHeaders<TData>, TNewBody>, TMethod, TEntitySchema, TErrors>;
             streamed: {
-                <TNewBody extends AnySchema>(schema: TNewBody): OutputSchemaProxy<DetailedOutput<ExtractOutputStatus<TData>, ExtractOutputHeaders<TData>>, TMethod, TEntitySchema, TErrors>;
+                <TNewBody extends AnySchema>(schema: TNewBody): OutputSchemaProxy<DetailedOutput<ExtractOutputStatus<TData>, ExtractOutputHeaders<TData>, EventIteratorWrappedSchema<TNewBody>>, TMethod, TEntitySchema, TErrors>;
                 <TNewBody extends AnySchema>(
                     builder: (current: ExtractOutputBody<TData>) => TNewBody,
-                ): OutputSchemaProxy<DetailedOutput<ExtractOutputStatus<TData>, ExtractOutputHeaders<TData>>, TMethod, TEntitySchema, TErrors>;
+                ): OutputSchemaProxy<DetailedOutput<ExtractOutputStatus<TData>, ExtractOutputHeaders<TData>, EventIteratorWrappedSchema<TNewBody>>, TMethod, TEntitySchema, TErrors>;
             };
         };
 
@@ -211,7 +218,7 @@ export abstract class DetailedOutputBuilder<
             const detailed = isDetailedMode(this.$data);
             const currentBody = detailed ? this._extractBody() : this._defaultBody();
             const baseSchema = typeof schemaOrBuilder === "function" ? (schemaOrBuilder as (current: ExtractOutputBody<TData>) => TNewBody)(currentBody) : schemaOrBuilder;
-            const streamedBody = eventIterator(baseSchema) as AnySchema;
+            const streamedBody = eventIterator(baseSchema) as EventIteratorWrappedSchema<TNewBody>;
             const status = detailed ? this._extractStatus() : this._defaultStatus();
             const headers = detailed ? this._extractHeaders() : this._defaultHeaders();
             const built = this._buildDetailedSchema(status, headers, streamedBody);
@@ -273,17 +280,17 @@ export abstract class DetailedOutputBuilder<
     /**
      * Wrap body as streamed `EventIterator` output.
      */
-    streamed<TNewBody extends AnySchema>(schema: TNewBody): OutputSchemaProxy<DetailedOutput<ExtractOutputStatus<TData>, ExtractOutputHeaders<TData>>, TMethod, TEntitySchema, TErrors>;
+    streamed<TNewBody extends AnySchema>(schema: TNewBody): OutputSchemaProxy<DetailedOutput<ExtractOutputStatus<TData>, ExtractOutputHeaders<TData>, EventIteratorWrappedSchema<TNewBody>>, TMethod, TEntitySchema, TErrors>;
     streamed<TNewBody extends AnySchema>(
         builder: (current: ExtractOutputBody<TData>) => TNewBody,
-    ): OutputSchemaProxy<DetailedOutput<ExtractOutputStatus<TData>, ExtractOutputHeaders<TData>>, TMethod, TEntitySchema, TErrors>;
+    ): OutputSchemaProxy<DetailedOutput<ExtractOutputStatus<TData>, ExtractOutputHeaders<TData>, EventIteratorWrappedSchema<TNewBody>>, TMethod, TEntitySchema, TErrors>;
     streamed<TNewBody extends AnySchema>(
         schemaOrBuilder: TNewBody | ((current: ExtractOutputBody<TData>) => TNewBody),
-    ): OutputSchemaProxy<DetailedOutput<ExtractOutputStatus<TData>, ExtractOutputHeaders<TData>>, TMethod, TEntitySchema, TErrors> {
+    ): OutputSchemaProxy<DetailedOutput<ExtractOutputStatus<TData>, ExtractOutputHeaders<TData>, EventIteratorWrappedSchema<TNewBody>>, TMethod, TEntitySchema, TErrors> {
         const detailed = isDetailedMode(this.$data);
         const currentBody = detailed ? this._extractBody() : this._defaultBody();
         const baseSchema = typeof schemaOrBuilder === "function" ? (schemaOrBuilder as (current: ExtractOutputBody<TData>) => TNewBody)(currentBody) : schemaOrBuilder;
-        const streamedBody = eventIterator(baseSchema) as AnySchema;
+        const streamedBody = eventIterator(baseSchema) as EventIteratorWrappedSchema<TNewBody>;
         const status = detailed ? this._extractStatus() : this._defaultStatus();
         const headers = detailed ? this._extractHeaders() : this._defaultHeaders();
         const built = this._buildDetailedSchema(status, headers, streamedBody);

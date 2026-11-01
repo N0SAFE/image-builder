@@ -1,0 +1,58 @@
+---
+title: Armbian Docker Builds
+description: Build and monitor bootable Armbian images in isolated Docker workers with local artifact storage.
+order: 12
+---
+
+This platform supports Armbian image builds through isolated worker containers.
+
+## Runtime model
+
+- API endpoint receives build payload (`board`, `release`, optional customization).
+- API starts one dedicated build container per request.
+- Build execution is orchestrated in NestJS. In `auto` mode the service runs the Armbian framework entrypoint (`bash ./compile.sh`) after validating source structure.
+- Build workspace is isolated per build id.
+- Produced `.img` / `.img.xz` artifacts are copied into persistent host storage.
+
+## Environment variables
+
+- `ARMBIAN_WORKER_IMAGE` (default: `ghcr.io/armbian/docker-armbian-build:armbian-ubuntu-noble-latest`)
+- `ARMBIAN_BUILD_ENTRYPOINT` (default: `auto`) — command used by the worker (`auto` uses the Armbian framework default `bash ./compile.sh`)
+- `ARMBIAN_STORAGE_PATH` (default: `/tmp/armbian-storage`)
+- `ARMBIAN_WORKSPACE_PATH` (default: `/tmp/armbian-workspaces`)
+- Optional Docker transport overrides:
+  - `DOCKER_HOST`
+  - `DOCKER_PORT`
+
+## API endpoints
+
+Armbian build CRUD/log/artifact/stream routes are exposed through shared ORPC contracts (`appContract.armbian.*`) and consumed by the web app through `orpc.armbian.*` hooks.
+Live runtime updates are streamed through the ORPC stream contract and implemented server-side with an async generator.
+
+- `POST /armbian/builds` — start a build
+- `GET /armbian/builds` — list recent builds with stored request config
+- `GET /armbian/builds/:buildId` — get status + artifacts
+- `GET /armbian/builds/:buildId/logs?tail=400` — read worker logs
+- `GET /armbian/builds/:buildId/artifacts` — list artifact files
+- `GET /armbian/builds/:buildId/stream?intervalMs=1500&tail=800` — streamed live status/step/log updates (ORPC streamed output)
+
+## Example request
+
+```json
+{
+  "board": "rockpi-4bplus",
+  "release": "noble",
+  "hostname": "rockpi4b",
+  "timezone": "Europe/Paris",
+  "username": "root",
+  "userPassword": "change-me",
+  "wifiSsid": "MyWifi",
+  "wifiPassword": "super-secret"
+}
+```
+
+## Operational notes
+
+1. Builds are CPU and disk intensive; keep storage volume sized for multiple parallel outputs.
+2. Every build runs in a separate container and workspace to avoid cross-contamination.
+3. Treat credentials as sensitive input and avoid long-term plaintext retention in logs.

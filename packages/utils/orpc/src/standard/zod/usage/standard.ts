@@ -13,6 +13,7 @@
 
 import { z } from "zod";
 import { InferContractRouterInputs, InferContractRouterOutputs, type HTTPPath } from "@orpc/contract";
+import type { InferProcedureInputFromSchema, InferProcedureOutputFromSchema } from "../../../utils/type-helpers";
 import { zodStandard } from "../standard-operations";
 import { userSchema } from "./entity";
 
@@ -1956,18 +1957,23 @@ type _DebugUserPatchInputBody = UserPatchInput extends { body: infer B } ? Simpl
 // STREAMED INPUT OPERATIONS - TYPE ASSERTIONS
 // ============================================================================
 //
-// NOTE: Streaming contract type inference is limited by external @orpc/contract
-// InferContractRouterInputs/Outputs from @orpc/contract don't fully support our
-// custom streaming contract types (.streamedInput, .websocket, .bidirectional).
+// NOTE: For custom streaming contracts, we use schema-based inference helpers
+// (`InferProcedureInputFromSchema` / `InferProcedureOutputFromSchema`) that read
+// directly from `contract["~orpc"].inputSchema/outputSchema`.
 //
-// The contracts work perfectly at runtime. This is purely a static type inference
-// limitation. See end of file for complete explanation.
+// This avoids generic widening to `unknown` that can happen in some higher-level
+// helper compositions.
 
 // --------------------------------------------------------------------------
 // userFileUploadContract
 // --------------------------------------------------------------------------
-type UserFileUploadInput = InferContractRouterInputs<typeof userFileUploadContract>;
-type UserFileUploadOutput = InferContractRouterOutputs<typeof userFileUploadContract>;
+type UserFileUploadInput = InferProcedureInputFromSchema<typeof userFileUploadContract>;
+type UserFileUploadOutput = InferProcedureOutputFromSchema<typeof userFileUploadContract>;
+
+type UserFileUploadInputIsAsyncIterator = AssertExtends<UserFileUploadInput, AsyncIterator<{ data: string; offset: number; totalSize: number; fileName?: string | undefined }>, "UserFileUploadInput should be typed AsyncIterator<chunk>">;
+type UserFileUploadOutputHasShape = AssertExtends<UserFileUploadOutput, { success: boolean; fileId: string; totalBytesReceived: number; chunks: number; uploadedAt: string }, "UserFileUploadOutput should preserve custom output schema">;
+const _checkUserFileUploadInputIsAsyncIterator: UserFileUploadInputIsAsyncIterator = true;
+const _checkUserFileUploadOutputHasShape: UserFileUploadOutputHasShape = true;
 
 // NOTE: Actual types resolve to 'unknown' due to inference limitation (documented below)
 // At runtime: Input = AsyncIterator<ChunkSchema>, Output = { success, fileId, totalBytesReceived, chunks, uploadedAt }
@@ -1977,8 +1983,13 @@ type _DebugUserFileUploadOutput = UserFileUploadOutput;
 // --------------------------------------------------------------------------
 // userBulkImportContract
 // --------------------------------------------------------------------------
-type UserBulkImportInput = InferContractRouterInputs<typeof userBulkImportContract>;
-type UserBulkImportOutput = InferContractRouterOutputs<typeof userBulkImportContract>;
+type UserBulkImportInput = InferProcedureInputFromSchema<typeof userBulkImportContract>;
+type UserBulkImportOutput = InferProcedureOutputFromSchema<typeof userBulkImportContract>;
+
+type UserBulkImportInputIsAsyncIterator = AssertExtends<UserBulkImportInput, AsyncIterator<unknown[]>, "UserBulkImportInput should be typed AsyncIterator<batch>">;
+type UserBulkImportOutputHasShape = AssertExtends<UserBulkImportOutput, { success: boolean; imported: number; failed: number }, "UserBulkImportOutput should preserve custom output schema">;
+const _checkUserBulkImportInputIsAsyncIterator: UserBulkImportInputIsAsyncIterator = true;
+const _checkUserBulkImportOutputHasShape: UserBulkImportOutputHasShape = true;
 
 // NOTE: Actual types resolve to 'unknown' due to inference limitation (documented below)
 // At runtime: Input = AsyncIterator<UserArray>, Output = { success, imported, failed, errors? }
@@ -1989,14 +2000,18 @@ type _DebugUserBulkImportOutput = UserBulkImportOutput;
 // WEBSOCKET OPERATIONS - TYPE ASSERTIONS
 // ============================================================================
 //
-// NOTE: Same limitation as streamed input operations above.
 // Websocket and bidirectional contracts use AsyncIterator for both directions.
 
 // --------------------------------------------------------------------------
 // userChatContract
 // --------------------------------------------------------------------------
-type UserChatInput = InferContractRouterInputs<typeof userChatContract>;
-type UserChatOutput = InferContractRouterOutputs<typeof userChatContract>;
+type UserChatInput = InferProcedureInputFromSchema<typeof userChatContract>;
+type UserChatOutput = InferProcedureOutputFromSchema<typeof userChatContract>;
+
+type UserChatInputIsAsyncIterator = AssertExtends<UserChatInput, AsyncIterator<{ message: string; timestamp: string; replyTo?: string | undefined }>, "UserChatInput should be typed AsyncIterator<input chunk>">;
+type UserChatOutputIsAsyncIterator = AssertExtends<UserChatOutput, AsyncIterator<{ id: string; message: string; author: { id: string; name: string }; timestamp: string; replyTo?: string | undefined }>, "UserChatOutput should be typed AsyncIterator<output chunk>">;
+const _checkUserChatInputIsAsyncIterator: UserChatInputIsAsyncIterator = true;
+const _checkUserChatOutputIsAsyncIterator: UserChatOutputIsAsyncIterator = true;
 
 // NOTE: Actual types resolve to 'unknown' due to inference limitation (documented below)
 // At runtime: Input = AsyncIterator<InputChunkSchema>, Output = AsyncIterator<OutputChunkSchema>
@@ -2006,8 +2021,13 @@ type _DebugUserChatOutput = UserChatOutput;
 // --------------------------------------------------------------------------
 // userCollaborativeEditContract
 // --------------------------------------------------------------------------
-type UserCollaborativeEditInput = InferContractRouterInputs<typeof userCollaborativeEditContract>;
-type UserCollaborativeEditOutput = InferContractRouterOutputs<typeof userCollaborativeEditContract>;
+type UserCollaborativeEditInput = InferProcedureInputFromSchema<typeof userCollaborativeEditContract>;
+type UserCollaborativeEditOutput = InferProcedureOutputFromSchema<typeof userCollaborativeEditContract>;
+
+type UserCollaborativeEditInputIsAsyncIterator = AssertExtends<UserCollaborativeEditInput, AsyncIterator<{ operation: "insert" | "delete" | "replace"; position: number; content: string; documentId: string }>, "UserCollaborativeEditInput should be typed AsyncIterator<input chunk>">;
+type UserCollaborativeEditOutputIsAsyncIterator = AssertExtends<UserCollaborativeEditOutput, AsyncIterator<{ operation: "insert" | "delete" | "replace"; position: number; content: string; documentId: string; userId: string; userName: string; appliedAt: string }>, "UserCollaborativeEditOutput should be typed AsyncIterator<output chunk>">;
+const _checkUserCollaborativeEditInputIsAsyncIterator: UserCollaborativeEditInputIsAsyncIterator = true;
+const _checkUserCollaborativeEditOutputIsAsyncIterator: UserCollaborativeEditOutputIsAsyncIterator = true;
 
 // NOTE: Actual types resolve to 'unknown' due to inference limitation (documented below)
 // At runtime: Input = AsyncIterator<OperationSchema>, Output = AsyncIterator<OperationSchema with userId, userName, appliedAt>
@@ -2060,41 +2080,22 @@ type _DebugUnionInferred = z.infer<typeof userReadConditionalContract["~orpc"]["
 // STREAMING INPUT/OUTPUT TYPE TESTS
 // ============================================================================
 
-// NOTE: Streaming contract type inference is limited by external @orpc/contract helpers
-// InferContractRouterInputs/Outputs from @orpc/contract don't fully support our custom
-// streaming contract types (.streamedInput, .streamedOutput, .websocket, .bidirectional).
-// The contracts work perfectly at runtime; this is purely a static type inference limitation.
+// NOTE: The custom schema-based inference helpers above are now used for
+// custom streaming contracts, avoiding `unknown` fallbacks in these cases.
 //
-// The streaming types resolve to 'unknown' because the external library's inference helpers
-// don't have logic to extract AsyncIterator types from our streaming schema structure.
-//
-// Manual verification: 
+// Manual verification:
 // - streamedInput contracts accept AsyncIterator<ChunkType> input
-// - streamedOutput contracts return AsyncIterator<ChunkType> output  
+// - streamedInput contracts preserve custom output schema
 // - websocket/bidirectional contracts use AsyncIterator for both input and output
-//
-// Until we create custom inference helpers or the upstream library adds support,
-// these type assertions are commented out to avoid false positive errors.
 
 // ============================================================================
 // NOTE ON STREAMING CONTRACT TYPE INFERENCE
 // ============================================================================
 //
-// The streaming/websocket contract types (FileUpload, BulkImport, Chat, CollabEdit, etc.)
-// resolve to 'unknown' when using InferContractRouterInputs/Outputs. This is NOT a bug.
+// When needed, prefer schema-based inference helpers for custom streaming
+// contracts:
+// - InferProcedureInputFromSchema<typeof contract>
+// - InferProcedureOutputFromSchema<typeof contract>
 //
-// REASON:
-// The @orpc/contract utility functions (InferContractRouterInputs/Outputs) from the
-// external library don't have built-in support for our custom streaming contract types:
-// - .streamedInput()      → uses AsyncIterator for input chunks
-// - .streamedOutput()     → uses AsyncIterator for output chunks
-// - .websocket()          → uses AsyncIterator for both directions
-// - .bidirectional()      → uses AsyncIterator for both directions
-//
-// The external library's inference logic expects standard REST-style contracts
-// and doesn't know how to extract AsyncIterator types from our streaming schema structure.
-//
-// SOLUTION:
-// The contracts work perfectly at runtime - this is purely a static TypeScript inference
-// limitation. If strict type safety for streaming contracts is needed, custom inference
-// helper types would need to be created for these patterns.
+// This keeps end-to-end types precise for event-iterator payloads while remaining
+// fully compatible with upstream contract/runtime behavior.

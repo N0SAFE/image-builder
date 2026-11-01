@@ -5,6 +5,7 @@ import {
   Users, 
   Settings, 
   Server,
+  Cpu,
   Home, 
   Shield, 
   UserCircle,
@@ -83,6 +84,11 @@ const adminNavItems: NavItem[] = [
     name: 'System', 
     href: '/dashboard/admin/system',
     icon: Settings,
+  },
+  {
+    name: 'Armbian',
+    href: '/dashboard/admin/armbian',
+    icon: Cpu,
   },
 ]
 

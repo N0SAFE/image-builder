@@ -32,6 +32,7 @@ import { ProviderSchemaModule } from "./modules/provider-schema/provider-schema.
 import { SystemModule } from "./system/system.module";
 import { SetupModule } from "./modules/setup/setup.module";
 import { PermissionModule } from "./modules/permission/permission.module";
+import { ArmbianModule } from "./modules/armbian/armbian.module";
 
 declare module "@orpc/nest" {
     /**
@@ -64,6 +65,7 @@ declare module "@orpc/nest" {
         PushModule,
         TestModule,
         SetupModule,
+        ArmbianModule,
         OrganizationModule,
         ProjectModule,
         ServiceModule,

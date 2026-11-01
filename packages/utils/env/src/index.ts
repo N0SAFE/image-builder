@@ -34,6 +34,10 @@ export const apiEnvSchema = zod
         NEXT_PUBLIC_API_URL: guardedUrl("NEXT_PUBLIC_API_URL", LOCAL_API_FALLBACK),
         DOCKER_HOST: zod.string().optional(),
         DOCKER_PORT: zod.coerce.number().int().min(1).max(65535).optional(),
+        ARMBIAN_WORKER_IMAGE: zod.string().optional(),
+        ARMBIAN_BUILD_ENTRYPOINT: zod.string().optional().default("auto"),
+        ARMBIAN_STORAGE_PATH: zod.string().optional().default("/armbian-data/storage"),
+        ARMBIAN_WORKSPACE_PATH: zod.string().optional().default("/armbian-data/workspaces"),
 
         // Web App URLs (for trusted origins)
         APP_URL: zod.url().optional(), // Private Docker network URL
